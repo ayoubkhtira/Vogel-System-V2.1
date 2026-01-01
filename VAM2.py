@@ -30,6 +30,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded" # Optionnel : garde le menu ouvert
 )
+st.title("📦 VOGEL SYSTEM - Optimisation Logistique")
 
 
 
@@ -327,4 +328,5 @@ with st.form("feedback_form", clear_on_submit=True):
             st.success("✅ Merci ! Votre avis a été envoyé et sera consulté.")
 
             st.balloons()
+
 
