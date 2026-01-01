@@ -31,7 +31,7 @@ st.set_page_config(
     initial_sidebar_state="expanded" # Optionnel : garde le menu ouvert
 )
 
-st.title("📦 VOGEL SYSTEM - Optimisation Logistique")
+
 
 def vogel_approximation_method(cost_matrix, supply, demand):
     supply = np.array(supply, dtype=float)
@@ -327,3 +327,4 @@ with st.form("feedback_form", clear_on_submit=True):
             st.success("✅ Merci ! Votre avis a été envoyé et sera consulté.")
 
             st.balloons()
+
