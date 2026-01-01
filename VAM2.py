@@ -209,8 +209,7 @@ def plot_sankey(allocation_matrix, source_names, dest_names):
 
 # --- Interface Utilisateur ---
 
-st.title("🚛 Optimisation de Transport : Méthode VAM")
-st.markdown("Minimisation des coûts et visualisation des flux logistiques.")
+
 
 with st.sidebar:
     st.header("1. Configuration")
@@ -326,4 +325,5 @@ with st.form("feedback_form", clear_on_submit=True):
         if msg:
             send_telegram_feedback(name, msg)
             st.success("✅ Merci ! Votre avis a été envoyé et sera consulté.")
+
             st.balloons()
