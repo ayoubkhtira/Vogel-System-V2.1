@@ -11,15 +11,6 @@ import plotly.express as px
 TOKEN = st.secrets["TELEGRAM_TOKEN"]
 CHAT_ID = st.secrets["TELEGRAM_CHAT_ID"]
 
-# -----------------------------------------------------------------------------
-# 1. CONFIGURATION DE LA PAGE
-# -----------------------------------------------------------------------------
-st.set_page_config(
-    page_title="VOGEL SYSTEM | Logistics Advisory",
-    page_icon="🏢",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
 # --- 5. AFFICHAGE DU HEADER (Composant Isolé) ---
 header_code = """
 <!DOCTYPE html>
@@ -409,6 +400,7 @@ with st.form("feedback_form", clear_on_submit=True):
             st.success("✅ Votre avis a été envoyé et sera consulté par l'équipe.")
         else:
             st.warning("⚠️ Le champ commentaire ne peut pas être vide.")
+
 
 
 
