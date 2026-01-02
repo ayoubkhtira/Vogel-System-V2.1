@@ -11,12 +11,6 @@ import plotly.express as px
 TOKEN = st.secrets["TELEGRAM_TOKEN"]
 CHAT_ID = st.secrets["TELEGRAM_CHAT_ID"]
 
-# --- Configuration de la page ---
-import streamlit as st
-import pandas as pd
-import numpy as np
-import requests
-
 # -----------------------------------------------------------------------------
 # 1. CONFIGURATION DE LA PAGE
 # -----------------------------------------------------------------------------
@@ -415,6 +409,7 @@ with st.form("feedback_form", clear_on_submit=True):
             st.success("✅ Votre avis a été envoyé et sera consulté par l'équipe.")
         else:
             st.warning("⚠️ Le champ commentaire ne peut pas être vide.")
+
 
 
 
