@@ -1,9 +1,10 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import io
-import plotly.graph_objects as go
 import requests
+import io
+import streamlit.components.v1 as components
+import plotly.graph_objects as go
 import plotly.express as px
 
 # --- CONFIGURATION TELEGRAM (À remplir ou via Secrets) ---
@@ -400,6 +401,7 @@ with st.form("feedback_form", clear_on_submit=True):
             st.success("✅ Votre avis a été envoyé et sera consulté par l'équipe.")
         else:
             st.warning("⚠️ Le champ commentaire ne peut pas être vide.")
+
 
 
 
