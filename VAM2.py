@@ -7,10 +7,84 @@ import requests
 import plotly.express as px
 
 # --- CONFIGURATION TELEGRAM (À remplir ou via Secrets) ---
-# Pour tester en local, tu peux mettre tes ID ici. 
-# Pour GitHub, utilise st.secrets pour la sécurité.
+
 TOKEN = st.secrets["TELEGRAM_TOKEN"]
 CHAT_ID = st.secrets["TELEGRAM_CHAT_ID"]
+
+# --- Configuration de la page ---
+import streamlit as st
+import pandas as pd
+import numpy as np
+import requests
+
+# -----------------------------------------------------------------------------
+# 1. CONFIGURATION DE LA PAGE
+# -----------------------------------------------------------------------------
+st.set_page_config(
+    page_title="VOGEL SYSTEM | Logistics Advisory",
+    page_icon="🏢",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+# --- 5. AFFICHAGE DU HEADER (Composant Isolé) ---
+header_code = """
+<!DOCTYPE html>
+<html>
+<head>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    body { margin: 0; padding: 0; background-color: transparent; font-family: 'Roboto', sans-serif; overflow: hidden; }
+    .main-header {
+        position: relative; padding: 30px; background: #0a0a0a; border-radius: 10px;
+        border-left: 12px solid #FF0000; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        min-height: 120px; display: flex; flex-direction: column; justify-content: center;
+    }
+    #bg-carousel {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background-size: cover; background-position: center; opacity: 0.3; transition: background-image 1.5s ease-in-out; z-index: 0;
+    }
+    .overlay {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
+        background-size: 100% 4px; z-index: 1; pointer-events: none;
+    }
+    .content { position: relative; z-index: 2; }
+    h1 { font-family: 'Orbitron', sans-serif; text-transform: uppercase; letter-spacing: 5px; font-size: 2.2rem; margin: 0; color: #ffffff; text-shadow: 0 0 15px rgba(230, 126, 34, 0.8); }
+    .status { color: #FF0000; font-weight: 700; letter-spacing: 4px; font-size: 0.8rem; text-transform: uppercase; margin-top: 10px; }
+    @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+    .active-dot { display: inline-block; width: 10px; height: 10px; background: #fff; border-radius: 50%; margin-left: 10px; animation: blink 1.5s infinite; box-shadow: 0 0 8px #fff; }
+</style>
+</head>
+<body>
+    <div class="main-header">
+        <div id="bg-carousel"></div>
+        <div class="overlay"></div>
+        <div class="content">
+            <h1> VOGEL SYSTEM <span style="color:#FF0000;">Pro</span></h1>
+            <div class="status">Logistics Intelligence <span class="active-dot"></span></div>
+        </div>
+    </div>
+    <script>
+        const images = [
+            "https://ts4.mm.bing.net/th?id=OIP.SP1huODTJEKsucmtJ60wdAHaEc&pid=15.1",
+            "https://ts1.mm.bing.net/th?id=OIP.eBuuZlc7PE_E6gGNbDVTtAHaE7&pid=15.1",
+            "https://ts1.mm.bing.net/th?id=OIP.w3xJ3p8KSGx-PmSJz-HxHwHaE8&pid=15.1",
+            "https://ts2.mm.bing.net/th?id=OIP.3lcfFwaiQLjVRmVEnIJgRQHaE7&pid=15.1",
+            
+        ];
+        let index = 0;
+        const bgDiv = document.getElementById('bg-carousel');
+        function changeBackground() {
+            bgDiv.style.backgroundImage = "url('" + images[index] + "')";
+            index = (index + 1) % images.length;
+        }
+        changeBackground();
+        setInterval(changeBackground, 5000);
+    </script>
+</body>
+</html>
+"""
+components.html(header_code, height=200)
 
 def send_telegram_feedback(name, message):
     if TOKEN == "TON_TOKEN_BOT_TELEGRAM":
@@ -26,11 +100,11 @@ def send_telegram_feedback(name, message):
 # --- Fonction Logique VAM ---
 st.set_page_config(
     page_title="VOGEL SYSTEM",
-    page_icon="📦",
+    page_icon="🚛",
     layout="wide",
     initial_sidebar_state="expanded" # Optionnel : garde le menu ouvert
 )
-st.title("Optimisation de Transport 🚛: Méthode Vogel")
+
 
 
 
@@ -240,7 +314,7 @@ st.caption("Entrez la demande pour chaque client.")
 demand_structure = pd.DataFrame(0.0, index=["DEMANDE"], columns=dest_names)
 demand_df = st.data_editor(demand_structure, key="demand_matrix", use_container_width=True)
 
-if st.button("🚀 Lancer l'Optimisation et Visualiser", type="primary"):
+if st.button("🚀 Lancer l'Optimisation et Visualiser", type="primary", use_container_width=True):
     try:
         costs = input_df.iloc[:, :-1].values
         supply = input_df.iloc[:, -1].values
@@ -316,19 +390,31 @@ if st.button("🚀 Lancer l'Optimisation et Visualiser", type="primary"):
     except Exception as e:
         st.error(f"Erreur de calcul : {e}")
 
+
 # --- SECTION AVIS & TELEGRAM ---
 st.divider()
 st.subheader("💬 Votre Avis")
+
 with st.form("feedback_form", clear_on_submit=True):
-    name = st.text_input("Votre Nom")
-    msg = st.text_area("Votre Commentaire")
-    if st.form_submit_button("Envoyer l'avis"):
+    name = st.text_input("👤 Votre Nom (ou entreprise)")
+    msg = st.text_area("✍️ Votre commentaire ou suggestion")
+    
+    # Bouton d'envoi
+    submit_button = st.form_submit_button("🚀 Envoyer l'avis", type="primary", use_container_width=True)
+
+    if submit_button:
         if msg:
-            send_telegram_feedback(name, msg)
-            st.success("✅ Merci ! Votre avis a été envoyé et sera consulté.")
-
-            st.balloons()
-
+            # 1. Animation de chargement pendant l'appel API
+            with st.status("Transmission de votre message ...", expanded=False) as status:
+                success = send_telegram_feedback(name, msg)
+                status.update(label="Message transmis avec succès ! ✅", state="complete")
+            
+            # 2. Petite notification discrète en bas à droite
+            st.toast(f"Merci {name if name else ''} ! Avis reçu.", icon='📩')
+            # Message de succès final
+            st.success("✅ Votre avis a été envoyé et sera consulté par l'équipe.")
+        else:
+            st.warning("⚠️ Le champ commentaire ne peut pas être vide.")
 
 
 
