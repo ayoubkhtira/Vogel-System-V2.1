@@ -6,11 +6,18 @@ import io
 import streamlit.components.v1 as components
 import plotly.graph_objects as go
 import plotly.express as px
+import random
 
 # --- CONFIGURATION TELEGRAM (À remplir ou via Secrets) ---
-
 TOKEN = st.secrets["TELEGRAM_TOKEN"]
 CHAT_ID = st.secrets["TELEGRAM_CHAT_ID"]
+
+st.set_page_config(
+    page_title="VOGEL SYSTEM",
+    page_icon="🚛",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 # --- 5. AFFICHAGE DU HEADER (Composant Isolé) ---
 header_code = """
@@ -18,6 +25,7 @@ header_code = """
 <html>
 <head>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <style>
     body { margin: 0; padding: 0; background-color: transparent; font-family: 'Roboto', sans-serif; overflow: hidden; }
     .main-header {
@@ -55,8 +63,7 @@ header_code = """
             "https://ts4.mm.bing.net/th?id=OIP.SP1huODTJEKsucmtJ60wdAHaEc&pid=15.1",
             "https://ts1.mm.bing.net/th?id=OIP.eBuuZlc7PE_E6gGNbDVTtAHaE7&pid=15.1",
             "https://ts1.mm.bing.net/th?id=OIP.w3xJ3p8KSGx-PmSJz-HxHwHaE8&pid=15.1",
-            "https://ts2.mm.bing.net/th?id=OIP.3lcfFwaiQLjVRmVEnIJgRQHaE7&pid=15.1",
-            
+            "https://ts2.mm.bing.net/th?id=OIP.3lcfFwaiQLjVRmVEnIJgRQHaE7&pid=15.1"
         ];
         let index = 0;
         const bgDiv = document.getElementById('bg-carousel');
@@ -81,18 +88,6 @@ def send_telegram_feedback(name, message):
         requests.post(url, json={"chat_id": CHAT_ID, "text": text, "parse_mode": "Markdown"})
     except:
         pass
-
-    
-# --- Fonction Logique VAM ---
-st.set_page_config(
-    page_title="VOGEL SYSTEM",
-    page_icon="🚛",
-    layout="wide",
-    initial_sidebar_state="expanded" # Optionnel : garde le menu ouvert
-)
-
-
-
 
 def vogel_approximation_method(cost_matrix, supply, demand):
     supply = np.array(supply, dtype=float)
@@ -142,12 +137,12 @@ def vogel_approximation_method(cost_matrix, supply, demand):
                 else:
                     row_penalties.append(-1)
 
-        # Pénalités Colonnes
+        # Pénalités Colonnes - CORRIGÉ
         for c in range(n_cols):
             if demand_temp[c] == 0:
                 col_penalties.append(-1)
             else:
-                col_valid = [r for r in costs_temp[:, c] if r < INF]
+                col_valid = [costs_temp[r, c] for r in range(n_rows) if costs_temp[r, c] < INF]
                 if len(col_valid) >= 2:
                     sorted_col = np.sort(col_valid)
                     col_penalties.append(sorted_col[1] - sorted_col[0])
@@ -189,7 +184,7 @@ def vogel_approximation_method(cost_matrix, supply, demand):
             costs_temp[:, col_idx] = INF
 
     total_cost = np.sum(allocation[:original_rows, :original_cols] * costs[:original_rows, :original_cols])
-    return allocation, total_cost
+    return allocation[:original_rows, :original_cols], total_cost
 
 # --- Export Excel ---
 def generate_excel(input_df, demand_df, res_df, total_cost, currency):
@@ -268,280 +263,45 @@ def plot_sankey(allocation_matrix, source_names, dest_names):
     fig.update_layout(title_text="Diagramme de Flux (Sankey)", font_size=12, height=500)
     return fig
 
-# --- Interface Utilisateur ---
-
-
-
-
-# === SIDEBAR VOGEL SYSTEM PRO - SHADOW ROUGE ===
+# === SIDEBAR SIMPLE MODERNE ===
 with st.sidebar:
-    # Header VOGEL SYSTEM style
     st.markdown("""
     <div style='
-        padding: 2.5rem 2rem;
-        background: linear-gradient(135deg, #0f172a 0%, #1a1a2e 100%);
-        border-radius: 0 25px 25px 0;
-        border-left: 8px solid #ff4757;
-        box-shadow: 0 25px 60px rgba(255,71,87,0.4);
+        padding: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 0 20px 20px 0;
         text-align: center;
-        position: relative;
-        overflow: hidden;
-        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(102,126,234,0.3);
+        margin-bottom: 1.5rem;
     '>
         <h2 style='
-            font-family: "Orbitron", monospace;
-            font-size: 1.8rem;
-            font-weight: 900;
-            margin: 0;
-            background: linear-gradient(45deg, #ffffff 0%, #ff6b35 50%, #ff4757 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 4px;
-            text-transform: uppercase;
+            color: white; 
+            margin: 0; 
+            font-size: 1.4rem; 
+            font-weight: 700;
+            letter-spacing: 1px;
         '>
-            <i class="fas fa-cogs" style="margin-right: 15px; color: #ff4757; font-size: 1.4rem;"></i>
-            VOGEL SYSTEM
+            ⚙️ PARAMÈTRES
         </h2>
-        <p style='
-            color: #ff6b6b;
-            font-family: "Orbitron", monospace;
-            font-size: 0.85rem;
-            font-weight: 700;
-            margin: 10px 0 0 0;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        '>CONFIGURATION PRO</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Devise - Shadow Rouge Simple
-    currency = st.text_input(
-        "💱 Symbole de la devise",
-        value="€",
-        help="€, $, £, ¥",
-        label_visibility="collapsed"
-    )
-    
-    # Fournisseurs - Shadow Rouge Simple  
-    num_sources = st.number_input(
-        "🏭 Nombre de Fournisseurs",
-        min_value=2, 
-        value=3,
-        step=1,
-        format="%d",
-        help="Nombre d'usines/sources"
-    )
-    
-    # Clients - Shadow Rouge Simple
-    num_dests = st.number_input(
-        "👥 Nombre de Clients",
-        min_value=2, 
-        value=3,
-        step=1,
-        format="%d",
-        help="Nombre de destinations/clients"
-    )
-    
-    # Footer Status
-    st.markdown("""
-    <div style='
-        padding: 1.5rem 1.5rem;
-        background: linear-gradient(90deg, #ff4757 0%, #ff6b35 100%);
-        border-radius: 0 15px 15px 0;
-        text-align: center;
-        box-shadow: 0 15px 40px rgba(255,71,87,0.4);
-        margin-top: 2rem;
-    '>
-        <div style='
-            color: white;
-            font-family: "Orbitron", monospace;
-            font-size: 0.9rem;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-        '>
-            <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
-            PRÊT À OPTIMISER
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    currency = st.text_input("💱 Devise", value="€", help="€, $, £")
+    num_sources = st.number_input("🏭 Fournisseurs", min_value=2, value=3, format="%d")
+    num_dests = st.number_input("👥 Clients", min_value=2, value=3, format="%d")
 
-# === CSS SHADOW ROUGE UNIQUEMENT SUR DATA EDITORS ===
 st.markdown("""
 <style>
-/* SHADOW ROUGE UNIQUEMENT SUR BOÎTES DE SAISIE */
 .stDataEditor .dataframe {
-    box-shadow: 0 20px 50px rgba(255,71,87,0.3) !important;
-    border-radius: 15px !important;
-    border-left: 5px solid #ff4757 !important;
-    background: rgba(255,255,255,0.95) !important;
-    backdrop-filter: blur(15px) !important;
-}
-
-.dark .stDataEditor .dataframe {
-    background: rgba(26,32,44,0.95) !important;
-    box-shadow: 0 25px 60px rgba(255,107,53,0.5) !important;
-}
-
-/* TYPO VOGEL SYSTEM */
-[data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
-    font-family: "Orbitron", monospace !important;
-}
-
-/* INPUTS Sidebar Clean */
-[data-testid="stSidebar"] .stTextInput > div > div > input,
-[data-testid="stSidebar"] .stNumberInput > div > div > input {
+    box-shadow: 0 15px 35px rgba(255,71,87,0.2) !important;
     border-radius: 12px !important;
-    border: 2px solid rgba(255,71,87,0.2) !important;
-    padding: 12px 16px !important;
-    background: rgba(255,255,255,0.9) !important;
+    border-left: 4px solid #ff4757 !important;
 }
-
-.dark [data-testid="stSidebar"] .stTextInput > div > div > input,
-.dark [data-testid="stSidebar"] .stNumberInput > div > div > input {
-    background: rgba(30,41,59,0.9) !important;
-    border-color: rgba(255,107,53,0.4) !important;
-    color: #f1f5f9 !important;
+.dark .stDataEditor .dataframe {
+    box-shadow: 0 20px 45px rgba(255,107,53,0.4) !important;
 }
 </style>
 """, unsafe_allow_html=True)
-
-    
-    col1, col2 = st.columns([1, 6])
-    with col1:
-        st.markdown("<div style='font-size: 1.4rem; color: #ff4757; margin-bottom: 0.5rem;'><i class='fas fa-euro-sign'></i></div>", unsafe_allow_html=True)
-    with col2:
-        st.markdown("<label style='font-weight: 600; color: #1f2937; margin-bottom: 0.5rem; font-size: 0.95rem;'>💱 Symbole de la devise</label>", unsafe_allow_html=True)
-    
-    currency = st.text_input(
-        "", 
-        value="€",
-        label_visibility="collapsed",
-        placeholder="€, $, £, ¥",
-        help="Symbol monétaire pour l'affichage des coûts",
-        key="currency_input"
-    )
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    # Section Fournisseurs - Progressif
-    st.markdown("""
-    <div style='
-        background: rgba(255,255,255,0.8);
-        backdrop-filter: blur(15px);
-        border-radius: 16px;
-        border: 1px solid rgba(226,232,240,0.6);
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    '>
-    """, unsafe_allow_html=True)
-    
-    col1, col2 = st.columns([1, 6])
-    with col1:
-        st.markdown("<div style='font-size: 1.4rem; color: #00d4aa; margin-bottom: 0.5rem;'><i class='fas fa-industry'></i></div>", unsafe_allow_html=True)
-    with col2:
-        st.markdown("<label style='font-weight: 600; color: #1f2937; margin-bottom: 0.5rem; font-size: 0.95rem;'>🏭 Nombre de Fournisseurs</label>", unsafe_allow_html=True)
-    
-    num_sources = st.number_input(
-        "",
-        min_value=2, 
-        value=3, 
-        step=1,
-        format="%d",
-        label_visibility="collapsed",
-        help="Nombre d'usines/sources d'approvisionnement",
-        key="sources_input"
-    )
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    # Section Clients - Animé
-    st.markdown("""
-    <div style='
-        background: rgba(255,255,255,0.8);
-        backdrop-filter: blur(15px);
-        border-radius: 16px;
-        border: 1px solid rgba(226,232,240,0.6);
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    '>
-    """, unsafe_allow_html=True)
-    
-    col1, col2 = st.columns([1, 6])
-    with col1:
-        st.markdown("<div style='font-size: 1.4rem; color: #ff6b35; margin-bottom: 0.5rem;'><i class='fas fa-users'></i></div>", unsafe_allow_html=True)
-    with col2:
-        st.markdown("<label style='font-weight: 600; color: #1f2937; margin-bottom: 0.5rem; font-size: 0.95rem;'>👥 Nombre de Clients</label>", unsafe_allow_html=True)
-    
-    num_dests = st.number_input(
-        "",
-        min_value=2, 
-        value=3, 
-        step=1,
-        format="%d",
-        label_visibility="collapsed",
-        help="Nombre de points de demande/clients finaux",
-        key="dests_input"
-    )
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    # Footer Sidebar avec bouton Reset
-    st.markdown("""
-    <div style='
-        padding: 1.5rem;
-        background: linear-gradient(145deg, rgba(0,212,170,0.1) 0%, rgba(0,184,148,0.1) 100%);
-        border-radius: 16px;
-        border: 2px solid rgba(0,212,170,0.3);
-        text-align: center;
-        box-shadow: 0 10px 30px rgba(0,212,170,0.2);
-        margin-top: 1rem;
-    '>
-        <div style='font-size: 0.85rem; color: #059669; font-weight: 600; margin-bottom: 1rem;'>
-            <i class='fas fa-check-circle'></i> Configuration prête
-        </div>
-        <button onclick='window.location.reload()' style='
-            background: linear-gradient(135deg, #00d4aa, #00b894);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 10px 24px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: inherit;
-            box-shadow: 0 8px 25px rgba(0,212,170,0.4);
-            transition: all 0.3s ease;
-        ' onmouseover='this.style.transform="translateY(-2px)"; this.style.boxShadow="0 12px 35px rgba(0,212,170,0.6)"' 
-        onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 8px 25px rgba(0,212,170,0.4)"'>
-            🔄 Reset Config
-        </button>
-    </div>
-    """, unsafe_allow_html=True)
-
-# === CSS DARK MODE pour la sidebar ===
-st.markdown("""
-<style>
-/* DARK MODE SIDEBAR */
-.dark [data-testid="stSidebar"] {
-    background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%) !important;
-}
-.dark .sidebar-card {
-    background: rgba(26,32,44,0.9) !important;
-    border-color: rgba(51,65,85,0.8) !important;
-}
-.dark .sidebar-header {
-    background: linear-gradient(145deg, rgba(26,32,44,0.95) 0%, rgba(15,23,42,0.9) 100%) !important;
-}
-.dark input, .dark textarea {
-    background: rgba(30,41,59,0.8) !important;
-    color: #f1f5f9 !important;
-    border-color: rgba(51,65,85,0.8) !important;
-}
-.dark label {
-    color: #e2e8f0 !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
 
 st.subheader("2. Personnalisation des Noms")
 col1, col2 = st.columns(2)
@@ -585,7 +345,7 @@ if st.button("🚀 Lancer l'Optimisation et Visualiser", type="primary", use_con
             if allocation.shape[1] > len(dest_names):
                 final_dests.append("Fictif (Demande)")
                 
-            res_df = pd.DataFrame(allocation, index=final_sources, columns=final_dests)
+            res_df = pd.DataFrame(allocation, index=final_sources[:allocation.shape[0]], columns=final_dests[:allocation.shape[1]])
             
             st.divider()
             
@@ -602,7 +362,7 @@ if st.button("🚀 Lancer l'Optimisation et Visualiser", type="primary", use_con
                 
             with tab2:
                 st.subheader("Flux Physiques (Source → Destination)")
-                sankey_fig = plot_sankey(allocation, final_sources, final_dests)
+                sankey_fig = plot_sankey(allocation, final_sources[:allocation.shape[0]], final_dests[:allocation.shape[1]])
                 st.plotly_chart(sankey_fig, use_container_width=True)
                 
                 st.divider()
@@ -641,7 +401,6 @@ if st.button("🚀 Lancer l'Optimisation et Visualiser", type="primary", use_con
     except Exception as e:
         st.error(f"Erreur de calcul : {e}")
 
-
 # --- SECTION AVIS & TELEGRAM ---
 st.divider()
 st.subheader("💬 Votre Avis")
@@ -666,11 +425,3 @@ with st.form("feedback_form", clear_on_submit=True):
             st.success("✅ Votre avis a été envoyé et sera consulté par l'équipe.")
         else:
             st.warning("⚠️ Le champ commentaire ne peut pas être vide.")
-
-
-
-
-
-
-
-
