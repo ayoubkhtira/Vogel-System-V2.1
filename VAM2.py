@@ -272,11 +272,205 @@ def plot_sankey(allocation_matrix, source_names, dest_names):
 
 
 
+# === SIDEBAR CONFIGURATION RÉACTIVE PREMIUM ===
 with st.sidebar:
-    st.header("1. Configuration")
-    currency = st.text_input("Symbole de la devise", value="€")
-    num_sources = st.number_input("Nombre de Fournisseurs", min_value=2, value=3)
-    num_dests = st.number_input("Nombre de Clients", min_value=2, value=3)
+    # Header avec icône animée
+    st.markdown("""
+    <div style='
+        padding: 2rem 1.5rem 1.5rem 1.5rem;
+        background: linear-gradient(145deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.7) 100%);
+        border-radius: 20px;
+        border-left: 5px solid transparent;
+        background-clip: padding-box;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(226,232,240,0.8);
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    '>
+        <div style='
+            position: absolute; top: -50%; right: -50%; 
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(255,71,87,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        '></div>
+        <h2 style='
+            font-family: "Orbitron", monospace;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin: 0;
+            background: linear-gradient(45deg, #ff4757, #ff6b35);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            position: relative; z-index: 2;
+        '>
+            <i class="fas fa-cog fa-spin" style="margin-right: 12px; color: #ff4757;"></i>
+            CONFIGURATION
+        </h2>
+        <p style='
+            color: #64748b; 
+            font-size: 0.85rem; 
+            margin: 8px 0 0 0;
+            font-weight: 500;
+            position: relative; z-index: 2;
+        '>Paramètres d'optimisation VAM</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Section Devise - Glass Card
+    st.markdown("""
+    <div style='
+        background: rgba(255,255,255,0.8);
+        backdrop-filter: blur(15px);
+        border-radius: 16px;
+        border: 1px solid rgba(226,232,240,0.6);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+    '>
+    """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([1, 6])
+    with col1:
+        st.markdown("<div style='font-size: 1.4rem; color: #ff4757; margin-bottom: 0.5rem;'><i class='fas fa-euro-sign'></i></div>", unsafe_allow_html=True)
+    with col2:
+        st.markdown("<label style='font-weight: 600; color: #1f2937; margin-bottom: 0.5rem; font-size: 0.95rem;'>💱 Symbole de la devise</label>", unsafe_allow_html=True)
+    
+    currency = st.text_input(
+        "", 
+        value="€",
+        label_visibility="collapsed",
+        placeholder="€, $, £, ¥",
+        help="Symbol monétaire pour l'affichage des coûts",
+        key="currency_input"
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    # Section Fournisseurs - Progressif
+    st.markdown("""
+    <div style='
+        background: rgba(255,255,255,0.8);
+        backdrop-filter: blur(15px);
+        border-radius: 16px;
+        border: 1px solid rgba(226,232,240,0.6);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    '>
+    """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([1, 6])
+    with col1:
+        st.markdown("<div style='font-size: 1.4rem; color: #00d4aa; margin-bottom: 0.5rem;'><i class='fas fa-industry'></i></div>", unsafe_allow_html=True)
+    with col2:
+        st.markdown("<label style='font-weight: 600; color: #1f2937; margin-bottom: 0.5rem; font-size: 0.95rem;'>🏭 Nombre de Fournisseurs</label>", unsafe_allow_html=True)
+    
+    num_sources = st.number_input(
+        "",
+        min_value=2, 
+        value=3, 
+        step=1,
+        format="%d",
+        label_visibility="collapsed",
+        help="Nombre d'usines/sources d'approvisionnement",
+        key="sources_input"
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    # Section Clients - Animé
+    st.markdown("""
+    <div style='
+        background: rgba(255,255,255,0.8);
+        backdrop-filter: blur(15px);
+        border-radius: 16px;
+        border: 1px solid rgba(226,232,240,0.6);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    '>
+    """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([1, 6])
+    with col1:
+        st.markdown("<div style='font-size: 1.4rem; color: #ff6b35; margin-bottom: 0.5rem;'><i class='fas fa-users'></i></div>", unsafe_allow_html=True)
+    with col2:
+        st.markdown("<label style='font-weight: 600; color: #1f2937; margin-bottom: 0.5rem; font-size: 0.95rem;'>👥 Nombre de Clients</label>", unsafe_allow_html=True)
+    
+    num_dests = st.number_input(
+        "",
+        min_value=2, 
+        value=3, 
+        step=1,
+        format="%d",
+        label_visibility="collapsed",
+        help="Nombre de points de demande/clients finaux",
+        key="dests_input"
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    # Footer Sidebar avec bouton Reset
+    st.markdown("""
+    <div style='
+        padding: 1.5rem;
+        background: linear-gradient(145deg, rgba(0,212,170,0.1) 0%, rgba(0,184,148,0.1) 100%);
+        border-radius: 16px;
+        border: 2px solid rgba(0,212,170,0.3);
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,212,170,0.2);
+        margin-top: 1rem;
+    '>
+        <div style='font-size: 0.85rem; color: #059669; font-weight: 600; margin-bottom: 1rem;'>
+            <i class='fas fa-check-circle'></i> Configuration prête
+        </div>
+        <button onclick='window.location.reload()' style='
+            background: linear-gradient(135deg, #00d4aa, #00b894);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 24px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 8px 25px rgba(0,212,170,0.4);
+            transition: all 0.3s ease;
+        ' onmouseover='this.style.transform="translateY(-2px)"; this.style.boxShadow="0 12px 35px rgba(0,212,170,0.6)"' 
+        onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 8px 25px rgba(0,212,170,0.4)"'>
+            🔄 Reset Config
+        </button>
+    </div>
+    """, unsafe_allow_html=True)
+
+# === CSS DARK MODE pour la sidebar ===
+st.markdown("""
+<style>
+/* DARK MODE SIDEBAR */
+.dark [data-testid="stSidebar"] {
+    background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%) !important;
+}
+.dark .sidebar-card {
+    background: rgba(26,32,44,0.9) !important;
+    border-color: rgba(51,65,85,0.8) !important;
+}
+.dark .sidebar-header {
+    background: linear-gradient(145deg, rgba(26,32,44,0.95) 0%, rgba(15,23,42,0.9) 100%) !important;
+}
+.dark input, .dark textarea {
+    background: rgba(30,41,59,0.8) !important;
+    color: #f1f5f9 !important;
+    border-color: rgba(51,65,85,0.8) !important;
+}
+.dark label {
+    color: #e2e8f0 !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 
 st.subheader("2. Personnalisation des Noms")
 col1, col2 = st.columns(2)
@@ -401,6 +595,7 @@ with st.form("feedback_form", clear_on_submit=True):
             st.success("✅ Votre avis a été envoyé et sera consulté par l'équipe.")
         else:
             st.warning("⚠️ Le champ commentaire ne peut pas être vide.")
+
 
 
 
