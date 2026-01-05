@@ -272,69 +272,140 @@ def plot_sankey(allocation_matrix, source_names, dest_names):
 
 
 
-# === SIDEBAR CONFIGURATION RÉACTIVE PREMIUM ===
+
+# === SIDEBAR VOGEL SYSTEM PRO - SHADOW ROUGE ===
 with st.sidebar:
-    # Header avec icône animée
+    # Header VOGEL SYSTEM style
     st.markdown("""
     <div style='
-        padding: 2rem 1.5rem 1.5rem 1.5rem;
-        background: linear-gradient(145deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.7) 100%);
-        border-radius: 20px;
-        border-left: 5px solid transparent;
-        background-clip: padding-box;
-        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(226,232,240,0.8);
-        margin-bottom: 2rem;
+        padding: 2.5rem 2rem;
+        background: linear-gradient(135deg, #0f172a 0%, #1a1a2e 100%);
+        border-radius: 0 25px 25px 0;
+        border-left: 8px solid #ff4757;
+        box-shadow: 0 25px 60px rgba(255,71,87,0.4);
         text-align: center;
         position: relative;
         overflow: hidden;
+        margin-bottom: 2rem;
     '>
-        <div style='
-            position: absolute; top: -50%; right: -50%; 
-            width: 200px; height: 200px;
-            background: radial-gradient(circle, rgba(255,71,87,0.1) 0%, transparent 70%);
-            animation: float 6s ease-in-out infinite;
-        '></div>
         <h2 style='
             font-family: "Orbitron", monospace;
-            font-size: 1.6rem;
-            font-weight: 700;
+            font-size: 1.8rem;
+            font-weight: 900;
             margin: 0;
-            background: linear-gradient(45deg, #ff4757, #ff6b35);
+            background: linear-gradient(45deg, #ffffff 0%, #ff6b35 50%, #ff4757 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: 2px;
+            letter-spacing: 4px;
             text-transform: uppercase;
-            position: relative; z-index: 2;
         '>
-            <i class="fas fa-cog fa-spin" style="margin-right: 12px; color: #ff4757;"></i>
-            CONFIGURATION
+            <i class="fas fa-cogs" style="margin-right: 15px; color: #ff4757; font-size: 1.4rem;"></i>
+            VOGEL SYSTEM
         </h2>
         <p style='
-            color: #64748b; 
-            font-size: 0.85rem; 
-            margin: 8px 0 0 0;
-            font-weight: 500;
-            position: relative; z-index: 2;
-        '>Paramètres d'optimisation VAM</p>
+            color: #ff6b6b;
+            font-family: "Orbitron", monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin: 10px 0 0 0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        '>CONFIGURATION PRO</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Section Devise - Glass Card
+    # Devise - Shadow Rouge Simple
+    currency = st.text_input(
+        "💱 Symbole de la devise",
+        value="€",
+        help="€, $, £, ¥",
+        label_visibility="collapsed"
+    )
+    
+    # Fournisseurs - Shadow Rouge Simple  
+    num_sources = st.number_input(
+        "🏭 Nombre de Fournisseurs",
+        min_value=2, 
+        value=3,
+        step=1,
+        format="%d",
+        help="Nombre d'usines/sources"
+    )
+    
+    # Clients - Shadow Rouge Simple
+    num_dests = st.number_input(
+        "👥 Nombre de Clients",
+        min_value=2, 
+        value=3,
+        step=1,
+        format="%d",
+        help="Nombre de destinations/clients"
+    )
+    
+    # Footer Status
     st.markdown("""
     <div style='
-        background: rgba(255,255,255,0.8);
-        backdrop-filter: blur(15px);
-        border-radius: 16px;
-        border: 1px solid rgba(226,232,240,0.6);
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        transition: all 0.3s ease;
+        padding: 1.5rem 1.5rem;
+        background: linear-gradient(90deg, #ff4757 0%, #ff6b35 100%);
+        border-radius: 0 15px 15px 0;
+        text-align: center;
+        box-shadow: 0 15px 40px rgba(255,71,87,0.4);
+        margin-top: 2rem;
     '>
+        <div style='
+            color: white;
+            font-family: "Orbitron", monospace;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        '>
+            <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
+            PRÊT À OPTIMISER
+        </div>
+    </div>
     """, unsafe_allow_html=True)
+
+# === CSS SHADOW ROUGE UNIQUEMENT SUR DATA EDITORS ===
+st.markdown("""
+<style>
+/* SHADOW ROUGE UNIQUEMENT SUR BOÎTES DE SAISIE */
+.stDataEditor .dataframe {
+    box-shadow: 0 20px 50px rgba(255,71,87,0.3) !important;
+    border-radius: 15px !important;
+    border-left: 5px solid #ff4757 !important;
+    background: rgba(255,255,255,0.95) !important;
+    backdrop-filter: blur(15px) !important;
+}
+
+.dark .stDataEditor .dataframe {
+    background: rgba(26,32,44,0.95) !important;
+    box-shadow: 0 25px 60px rgba(255,107,53,0.5) !important;
+}
+
+/* TYPO VOGEL SYSTEM */
+[data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
+    font-family: "Orbitron", monospace !important;
+}
+
+/* INPUTS Sidebar Clean */
+[data-testid="stSidebar"] .stTextInput > div > div > input,
+[data-testid="stSidebar"] .stNumberInput > div > div > input {
+    border-radius: 12px !important;
+    border: 2px solid rgba(255,71,87,0.2) !important;
+    padding: 12px 16px !important;
+    background: rgba(255,255,255,0.9) !important;
+}
+
+.dark [data-testid="stSidebar"] .stTextInput > div > div > input,
+.dark [data-testid="stSidebar"] .stNumberInput > div > div > input {
+    background: rgba(30,41,59,0.9) !important;
+    border-color: rgba(255,107,53,0.4) !important;
+    color: #f1f5f9 !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
     
     col1, col2 = st.columns([1, 6])
     with col1:
@@ -595,6 +666,7 @@ with st.form("feedback_form", clear_on_submit=True):
             st.success("✅ Votre avis a été envoyé et sera consulté par l'équipe.")
         else:
             st.warning("⚠️ Le champ commentaire ne peut pas être vide.")
+
 
 
 
