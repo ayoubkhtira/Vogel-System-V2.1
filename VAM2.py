@@ -19,6 +19,161 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# --- CSS pour le dark/light mode et le switch ---
+st.markdown("""
+<style>
+:root {
+    --primary-color: #667eea;
+    --secondary-color: #764ba2;
+    --text-color: #333;
+    --bg-color: #f8f9fa;
+    --card-bg: #ffffff;
+    --border-color: #e0e0e0;
+}
+
+[data-theme="dark"] {
+    --primary-color: #764ba2;
+    --secondary-color: #667eea;
+    --text-color: #f0f0f0;
+    --bg-color: #1a1a1a;
+    --card-bg: #2d2d2d;
+    --border-color: #444;
+}
+
+body {
+    background-color: var(--bg-color) !important;
+    color: var(--text-color) !important;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.stApp {
+    background-color: var(--bg-color) !important;
+}
+
+/* Style du switch */
+.switch-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem 0;
+    margin-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #667eea;
+    transition: .4s;
+    border-radius: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+    z-index: 2;
+}
+
+input:checked + .slider {
+    background-color: #764ba2;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.slider i {
+    font-size: 14px;
+    z-index: 1;
+}
+
+.slider .fa-sun {
+    color: #ffd700 !important;
+}
+
+.slider .fa-moon {
+    color: #fff !important;
+}
+
+/* Ajustements pour le dark mode */
+[data-theme="dark"] .stDataEditor .dataframe {
+    box-shadow: 0 20px 45px rgba(255, 107, 53, 0.4) !important;
+    background-color: var(--card-bg) !important;
+}
+
+[data-theme="dark"] .stButton button {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+[data-theme="dark"] .stButton button:hover {
+    background-color: var(--secondary-color) !important;
+}
+
+[data-theme="dark"] .stTextInput input,
+[data-theme="dark"] .stTextArea textarea,
+[data-theme="dark"] .stNumberInput input {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+</style>
+
+<script>
+// Charger le thème depuis localStorage
+function loadTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.getElementById('switch').checked = (savedTheme === 'dark');
+}
+
+// Basculer le thème
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+}
+
+// Attacher l'événement au switch
+document.addEventListener('DOMContentLoaded', function() {
+    loadTheme();
+    const themeSwitch = document.getElementById('switch');
+    if (themeSwitch) {
+        themeSwitch.addEventListener('change', toggleTheme);
+    }
+});
+</script>
+""", unsafe_allow_html=True)
+
 # --- 5. AFFICHAGE DU HEADER (Composant Isolé) ---
 header_code = """
 <!DOCTYPE html>
@@ -289,6 +444,22 @@ with st.sidebar:
     currency = st.text_input("💱 Devise", value="€", help="€, $, £")
     num_sources = st.number_input("🏭 Fournisseurs", min_value=2, value=3, format="%d")
     num_dests = st.number_input("👥 Clients", min_value=2, value=3, format="%d")
+    
+    # --- SWITCH DARK/LIGHT MODE ---
+    st.markdown('<div class="switch-container">', unsafe_allow_html=True)
+    st.markdown("""
+    <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+        <label class="switch">
+            <input type="checkbox" id="switch">
+            <span class="slider round">
+                <i class="fas fa-sun"></i>
+                <i class="fas fa-moon"></i>
+            </span>
+        </label>
+        <span style="color: var(--text-color); font-weight: 500;">Mode Sombre</span>
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown("""
 <style>
@@ -425,3 +596,43 @@ with st.form("feedback_form", clear_on_submit=True):
             st.success("✅ Votre avis a été envoyé et sera consulté par l'équipe.")
         else:
             st.warning("⚠️ Le champ commentaire ne peut pas être vide.")
+
+# --- JavaScript pour charger le thème initial ---
+components.html("""
+<script>
+// Fonction pour initialiser le thème
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    const switchElement = document.getElementById('switch');
+    if (switchElement) {
+        switchElement.checked = (savedTheme === 'dark');
+    }
+}
+
+// Attacher l'événement au switch
+function attachSwitchListener() {
+    const themeSwitch = document.getElementById('switch');
+    if (themeSwitch) {
+        themeSwitch.addEventListener('change', function() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+    }
+}
+
+// Initialiser quand la page est chargée
+document.addEventListener('DOMContentLoaded', function() {
+    initTheme();
+    attachSwitchListener();
+});
+
+// Réessayer après un court délai au cas où les éléments ne seraient pas encore chargés
+setTimeout(() => {
+    initTheme();
+    attachSwitchListener();
+}, 100);
+</script>
+""", height=0)
