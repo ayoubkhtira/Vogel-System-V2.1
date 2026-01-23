@@ -6,7 +6,6 @@ import io
 import streamlit.components.v1 as components
 import plotly.graph_objects as go
 import plotly.express as px
-import random
 
 # --- CONFIGURATION TELEGRAM (À remplir ou via Secrets) ---
 TOKEN = st.secrets["TELEGRAM_TOKEN"]
@@ -19,260 +18,285 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Initialiser l'état du thème dans la session
+# Initialiser l'état du thème
 if 'dark_mode' not in st.session_state:
     st.session_state.dark_mode = False
 
-# --- CSS pour le dark/light mode et le switch ---
-st.markdown(f"""
+# Fonction pour basculer le thème
+def toggle_theme():
+    st.session_state.dark_mode = not st.session_state.dark_mode
+
+# --- CSS UNIFORME POUR L'APPLICATION ---
+css = """
 <style>
-:root {{
-    --primary-color: #667eea;
-    --secondary-color: #764ba2;
-    --text-color: #333;
-    --bg-color: #f8f9fa;
-    --card-bg: #ffffff;
-    --border-color: #e0e0e0;
-}}
+/* Variables CSS pour les thèmes */
+:root {
+    /* Mode Clair */
+    --primary: #2563eb;
+    --secondary: #7c3aed;
+    --background: #f8fafc;
+    --surface: #ffffff;
+    --text: #1e293b;
+    --text-secondary: #64748b;
+    --border: #e2e8f0;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
 
-[data-theme="dark"] {{
-    --primary-color: #764ba2;
-    --secondary-color: #667eea;
-    --text-color: #f0f0f0;
-    --bg-color: #1a1a1a;
-    --card-bg: #2d2d2d;
-    --border-color: #444;
-}}
+[data-theme="dark"] {
+    /* Mode Sombre */
+    --primary: #3b82f6;
+    --secondary: #8b5cf6;
+    --background: #0f172a;
+    --surface: #1e293b;
+    --text: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border: #334155;
+    --success: #34d399;
+    --warning: #fbbf24;
+    --error: #f87171;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
 
-body {{
-    background-color: var(--bg-color) !important;
-    color: var(--text-color) !important;
-    transition: background-color 0.3s, color 0.3s;
-}}
+/* Styles généraux */
+* {
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
 
-.stApp {{
-    background-color: var(--bg-color) !important;
-}}
+.stApp {
+    background-color: var(--background) !important;
+    color: var(--text) !important;
+}
 
-/* Style du switch */
-.switch-container {{
+/* Header */
+.main-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%) !important;
+    color: white !important;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+}
+
+/* Widgets Streamlit */
+.stButton > button {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 1.5rem !important;
+    font-weight: 600 !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.stButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.stTextInput > div > div > input,
+.stNumberInput > div > div > input,
+.stTextArea > div > div > textarea {
+    background-color: var(--surface) !important;
+    color: var(--text) !important;
+    border: 2px solid var(--border) !important;
+    border-radius: 8px !important;
+    padding: 0.75rem !important;
+}
+
+.stSelectbox > div > div {
+    background-color: var(--surface) !important;
+    color: var(--text) !important;
+    border: 2px solid var(--border) !important;
+    border-radius: 8px !important;
+}
+
+.stDataFrame {
+    background-color: var(--surface) !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--border) !important;
+    overflow: hidden !important;
+}
+
+.stExpander {
+    background-color: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+}
+
+.stTabs [data-baseweb="tab-list"] {
+    background-color: var(--surface) !important;
+    border-radius: 8px !important;
+    padding: 4px !important;
+}
+
+.stTabs [data-baseweb="tab"] {
+    color: var(--text) !important;
+}
+
+.stMetric {
+    background-color: var(--surface) !important;
+    padding: 1rem !important;
+    border-radius: 8px !important;
+    border: 1px solid var(--border) !important;
+}
+
+/* Bouton du thème */
+.theme-toggle {
     display: flex;
-    justify-content: center;
     align-items: center;
-    padding: 1rem 0;
-    margin-top: 1rem;
-    border-top: 1px solid var(--border-color);
-}}
+    gap: 10px;
+    padding: 10px;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
 
-.switch {{
+.theme-toggle:hover {
+    border-color: var(--primary);
+}
+
+.theme-switch {
     position: relative;
-    display: inline-block;
     width: 60px;
-    height: 34px;
-}}
+    height: 30px;
+}
 
-.switch input {{
+.theme-switch input {
     opacity: 0;
     width: 0;
     height: 0;
-}}
+}
 
-.slider {{
+.theme-slider {
     position: absolute;
     cursor: pointer;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #667eea;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
     transition: .4s;
     border-radius: 34px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 6px;
-}}
+}
 
-.slider:before {{
+.theme-slider:before {
     position: absolute;
     content: "";
-    height: 26px;
-    width: 26px;
+    height: 22px;
+    width: 22px;
     left: 4px;
     bottom: 4px;
     background-color: white;
     transition: .4s;
     border-radius: 50%;
-    z-index: 2;
-}}
+}
 
-input:checked + .slider {{
-    background-color: #764ba2;
-}}
+input:checked + .theme-slider:before {
+    transform: translateX(30px);
+}
 
-input:checked + .slider:before {{
-    transform: translateX(26px);
-}}
+.theme-icon {
+    font-size: 1.2rem;
+}
 
-.slider i {{
-    font-size: 14px;
-    z-index: 1;
-}}
+/* Cartes et conteneurs */
+.card {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+}
 
-.slider .fa-sun {{
-    color: #ffd700 !important;
-}}
+/* Typographie */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text) !important;
+}
 
-.slider .fa-moon {{
-    color: #fff !important;
-}}
+p {
+    color: var(--text-secondary) !important;
+}
 
-/* Appliquer le thème au body */
-body[data-theme="dark"] {{
-    background-color: #1a1a1a !important;
-    color: #f0f0f0 !important;
-}}
+/* Séparateurs */
+hr {
+    border-color: var(--border) !important;
+    margin: 2rem 0 !important;
+}
 
-/* Ajustements pour Streamlit components en dark mode */
-[data-theme="dark"] .stDataFrame, 
-[data-theme="dark"] .dataframe, 
-[data-theme="dark"] .stDataEditor,
-[data-theme="dark"] .stTable {{
-    background-color: #2d2d2d !important;
-    color: #f0f0f0 !important;
-}}
+/* Status messages */
+.stAlert {
+    border-radius: 8px !important;
+    border-left: 4px solid var(--primary) !important;
+}
 
-[data-theme="dark"] .stTextInput input,
-[data-theme="dark"] .stTextArea textarea,
-[data-theme="dark"] .stNumberInput input {{
-    background-color: #2d2d2d !important;
-    color: #f0f0f0 !important;
-    border-color: #444 !important;
-}}
+.stSuccess {
+    background-color: rgba(16, 185, 129, 0.1) !important;
+    border-left-color: var(--success) !important;
+}
 
-[data-theme="dark"] .stButton button {{
-    background-color: #764ba2 !important;
-    color: white !important;
-}}
+.stWarning {
+    background-color: rgba(245, 158, 11, 0.1) !important;
+    border-left-color: var(--warning) !important;
+}
 
-[data-theme="dark"] .stButton button:hover {{
-    background-color: #667eea !important;
-}}
-
-[data-theme="dark"] .stMetric {{
-    color: #f0f0f0 !important;
-}}
-
-[data-theme="dark"] .stExpander {{
-    background-color: #2d2d2d !important;
-    border-color: #444 !important;
-}}
-
-[data-theme="dark"] .stTabs [data-baseweb="tab-list"] {{
-    background-color: #2d2d2d !important;
-}}
-
-[data-theme="dark"] .stTabs [data-baseweb="tab"] {{
-    color: #f0f0f0 !important;
-}}
-
-[data-theme="dark"] .stSubheader, 
-[data-theme="dark"] .stMarkdown h1,
-[data-theme="dark"] .stMarkdown h2,
-[data-theme="dark"] .stMarkdown h3 {{
-    color: #f0f0f0 !important;
-}}
-
-[data-theme="dark"] .stDataEditor .dataframe {{
-    box-shadow: 0 20px 45px rgba(255, 107, 53, 0.4) !important;
-    background-color: #2d2d2d !important;
-    color: #f0f0f0 !important;
-}}
+.stError {
+    background-color: rgba(239, 68, 68, 0.1) !important;
+    border-left-color: var(--error) !important;
+}
 </style>
-
-<script>
-// Définir le thème initial basé sur l'état de session
-document.addEventListener('DOMContentLoaded', function() {{
-    const isDarkMode = {str(st.session_state.dark_mode).lower()};
-    document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-    
-    // Mettre à jour le checkbox
-    const switchElement = document.getElementById('theme-switch');
-    if (switchElement) {{
-        switchElement.checked = isDarkMode;
-    }}
-}});
-</script>
-""", unsafe_allow_html=True)
-
-# Fonction pour basculer le thème
-def toggle_theme():
-    st.session_state.dark_mode = not st.session_state.dark_mode
-    st.rerun()
-
-# --- 5. AFFICHAGE DU HEADER (Composant Isolé) ---
-header_code = """
-<!DOCTYPE html>
-<html>
-<head>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-<style>
-    body { margin: 0; padding: 0; background-color: transparent; font-family: 'Roboto', sans-serif; overflow: hidden; }
-    .main-header {
-        position: relative; padding: 30px; background: #0a0a0a; border-radius: 10px;
-        border-left: 12px solid #FF0000; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-        min-height: 120px; display: flex; flex-direction: column; justify-content: center;
-    }
-    #bg-carousel {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background-size: cover; background-position: center; opacity: 0.3; transition: background-image 1.5s ease-in-out; z-index: 0;
-    }
-    .overlay {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
-        background-size: 100% 4px; z-index: 1; pointer-events: none;
-    }
-    .content { position: relative; z-index: 2; }
-    h1 { font-family: 'Orbitron', sans-serif; text-transform: uppercase; letter-spacing: 5px; font-size: 2.2rem; margin: 0; color: #ffffff; text-shadow: 0 0 15px rgba(230, 126, 34, 0.8); }
-    .status { color: #FF0000; font-weight: 700; letter-spacing: 4px; font-size: 0.8rem; text-transform: uppercase; margin-top: 10px; }
-    @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-    .active-dot { display: inline-block; width: 10px; height: 10px; background: #fff; border-radius: 50%; margin-left: 10px; animation: blink 1.5s infinite; box-shadow: 0 0 8px #fff; }
-</style>
-</head>
-<body>
-    <div class="main-header">
-        <div id="bg-carousel"></div>
-        <div class="overlay"></div>
-        <div class="content">
-            <h1> VOGEL SYSTEM <span style="color:#FF0000;">Pro</span></h1>
-            <div class="status">Logistics Intelligence <span class="active-dot"></span></div>
-        </div>
-    </div>
-    <script>
-        const images = [
-            "https://ts4.mm.bing.net/th?id=OIP.SP1huODTJEKsucmtJ60wdAHaEc&pid=15.1",
-            "https://ts1.mm.bing.net/th?id=OIP.eBuuZlc7PE_E6gGNbDVTtAHaE7&pid=15.1",
-            "https://ts1.mm.bing.net/th?id=OIP.w3xJ3p8KSGx-PmSJz-HxHwHaE8&pid=15.1",
-            "https://ts2.mm.bing.net/th?id=OIP.3lcfFwaiQLjVRmVEnIJgRQHaE7&pid=15.1"
-        ];
-        let index = 0;
-        const bgDiv = document.getElementById('bg-carousel');
-        function changeBackground() {
-            bgDiv.style.backgroundImage = "url('" + images[index] + "')";
-            index = (index + 1) % images.length;
-        }
-        changeBackground();
-        setInterval(changeBackground, 5000);
-    </script>
-</body>
-</html>
 """
-components.html(header_code, height=200)
 
+# Appliquer le CSS
+st.markdown(css, unsafe_allow_html=True)
+
+# Appliquer le thème au body
+theme = "dark" if st.session_state.dark_mode else "light"
+st.markdown(f'<body data-theme="{theme}">', unsafe_allow_html=True)
+
+# --- HEADER SIMPLIFIÉ ---
+header_html = f"""
+<div class="main-header">
+    <h1 style="color: white; margin: 0; font-size: 2.5rem; font-weight: 700;">VOGEL SYSTEM <span style="color: #ff6b35;">Pro</span></h1>
+    <p style="color: rgba(255, 255, 255, 0.9); margin-top: 0.5rem; font-size: 1.1rem;">Logistics Intelligence Platform</p>
+</div>
+"""
+st.markdown(header_html, unsafe_allow_html=True)
+
+# === SIDEBAR SIMPLIFIÉ ===
+with st.sidebar:
+    # Header de la sidebar
+    st.markdown("""
+    <div style="text-align: center; padding: 1.5rem; border-radius: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-bottom: 2rem;">
+        <h2 style="color: white; margin: 0; font-size: 1.5rem;">⚙️ PARAMÈTRES</h2>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Paramètres principaux
+    currency = st.selectbox("💱 Devise", ["€", "$", "£", "¥", "₹"], index=0)
+    num_sources = st.number_input("🏭 Nombre de Fournisseurs", min_value=2, max_value=10, value=3)
+    num_dests = st.number_input("👥 Nombre de Clients", min_value=2, max_value=10, value=3)
+    
+    # Séparateur
+    st.markdown("---")
+    
+    # Bouton de thème simplifié
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        current_theme = "🌙 Sombre" if st.session_state.dark_mode else "☀️ Clair"
+        if st.button(f"{current_theme}", use_container_width=True):
+            toggle_theme()
+            st.rerun()
+
+# --- Fonctions principales (inchangées) ---
 def send_telegram_feedback(name, message):
     if TOKEN == "TON_TOKEN_BOT_TELEGRAM":
-        return # Ne rien faire si pas configuré
+        return
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     text = f"🚀 *Nouvel avis sur l'app VAM*\n\n*Nom:* {name}\n*Message:* {message}"
     try:
@@ -287,11 +311,9 @@ def vogel_approximation_method(cost_matrix, supply, demand):
     
     n_rows, n_cols = costs.shape
     
-    # Sauvegarde dimensions originales
     original_cols = n_cols
     original_rows = n_rows
     
-    # Gestion des cas déséquilibrés (Dummy)
     if supply.sum() > demand.sum():
         diff = supply.sum() - demand.sum()
         demand = np.append(demand, diff)
@@ -314,7 +336,6 @@ def vogel_approximation_method(cost_matrix, supply, demand):
         row_penalties = []
         col_penalties = []
 
-        # Pénalités Lignes
         for r in range(n_rows):
             if supply_temp[r] == 0:
                 row_penalties.append(-1)
@@ -328,7 +349,6 @@ def vogel_approximation_method(cost_matrix, supply, demand):
                 else:
                     row_penalties.append(-1)
 
-        # Pénalités Colonnes - CORRIGÉ
         for c in range(n_cols):
             if demand_temp[c] == 0:
                 col_penalties.append(-1)
@@ -354,7 +374,6 @@ def vogel_approximation_method(cost_matrix, supply, demand):
             if len(valid_cols) > 0:
                 col_idx = valid_cols[np.argmin(costs_temp[row_idx, valid_cols])]
             else:
-                 # Fallback rare edge case
                 col_idx = np.argmax(demand_temp > 0)
         else:
             col_idx = np.argmax(col_penalties)
@@ -377,7 +396,6 @@ def vogel_approximation_method(cost_matrix, supply, demand):
     total_cost = np.sum(allocation[:original_rows, :original_cols] * costs[:original_rows, :original_cols])
     return allocation[:original_rows, :original_cols], total_cost
 
-# --- Export Excel ---
 def generate_excel(input_df, demand_df, res_df, total_cost, currency):
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
@@ -408,16 +426,13 @@ def generate_excel(input_df, demand_df, res_df, total_cost, currency):
         
     return output.getvalue()
 
-# --- Visualisation Sankey ---
 def plot_sankey(allocation_matrix, source_names, dest_names):
-    # Préparation des labels (Sources + Dests)
     labels = source_names + dest_names
     
-    # Indices Plotly : Sources [0..n-1], Dests [n..n+m-1]
     source_indices = []
     target_indices = []
     values = []
-    custom_data = [] # Pour afficher les infos au survol
+    custom_data = []
 
     n_sources = len(source_names)
     
@@ -426,22 +441,19 @@ def plot_sankey(allocation_matrix, source_names, dest_names):
             qty = allocation_matrix[r, c]
             if qty > 0:
                 source_indices.append(r)
-                target_indices.append(n_sources + c) # Offset pour les destinations
+                target_indices.append(n_sources + c)
                 values.append(qty)
-                
-                # Info bulle
                 src_name = source_names[r]
                 dst_name = dest_names[c]
                 custom_data.append(f"{src_name} → {dst_name}")
 
-    # Création du diagramme
     fig = go.Figure(data=[go.Sankey(
         node = dict(
             pad = 15,
             thickness = 20,
             line = dict(color = "black", width = 0.5),
             label = labels,
-            color = "blue"
+            color = "#3b82f6"
         ),
         link = dict(
             source = source_indices,
@@ -450,117 +462,103 @@ def plot_sankey(allocation_matrix, source_names, dest_names):
             customdata = custom_data,
             hovertemplate='%{customdata}<br />Quantité: %{value}<extra></extra>'
         ))])
-
-    fig.update_layout(title_text="Diagramme de Flux (Sankey)", font_size=12, height=500)
+    fig.update_layout(
+        title_text="Diagramme de Flux (Sankey)",
+        font_size=12,
+        height=500,
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
+    )
     return fig
 
-# === SIDEBAR SIMPLE MODERNE ===
-with st.sidebar:
-    st.markdown("""
-    <div style='
-        padding: 2rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 0 20px 20px 0;
-        text-align: center;
-        box-shadow: 0 10px 30px rgba(102,126,234,0.3);
-        margin-bottom: 1.5rem;
-    '>
-        <h2 style='
-            color: white; 
-            margin: 0; 
-            font-size: 1.4rem; 
-            font-weight: 700;
-            letter-spacing: 1px;
-        '>
-            ⚙️ PARAMÈTRES
-        </h2>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    currency = st.text_input("💱 Devise", value="€", help="€, $, £")
-    num_sources = st.number_input("🏭 Fournisseurs", min_value=2, value=3, format="%d")
-    num_dests = st.number_input("👥 Clients", min_value=2, value=3, format="%d")
-    
-    # --- SWITCH DARK/LIGHT MODE ---
-    st.markdown('<div class="switch-container">', unsafe_allow_html=True)
-    
-    # Créer une colonne pour centrer le switch
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        # Utiliser un bouton avec HTML pour le switch
-        switch_html = f"""
-        <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-            <label class="switch">
-                <input type="checkbox" id="theme-switch" {'checked' if st.session_state.dark_mode else ''}>
-                <span class="slider round">
-                    <i class="fas fa-sun"></i>
-                    <i class="fas fa-moon"></i>
-                </span>
-            </label>
-            <span style="color: {'#f0f0f0' if st.session_state.dark_mode else '#333'}; font-weight: 500;">
-                {('Mode Sombre' if st.session_state.dark_mode else 'Mode Clair')}
-            </span>
-        </div>
-        """
-        st.markdown(switch_html, unsafe_allow_html=True)
-        
-        # Ajouter un bouton invisible pour déclencher le changement
-        if st.button("🔁 Basculer le thème", key="theme_toggle", use_container_width=True):
-            toggle_theme()
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+# --- SECTION PRINCIPALE DE L'APPLICATION ---
 
-# Afficher l'indicateur de thème actuel
-theme_indicator = "🌙 Mode Sombre" if st.session_state.dark_mode else "☀️ Mode Clair"
-st.sidebar.caption(f"Thème actuel: {theme_indicator}")
-
+# Section 1: Personnalisation des noms
 st.markdown("""
-<style>
-.stDataEditor .dataframe {
-    box-shadow: 0 15px 35px rgba(255,71,87,0.2) !important;
-    border-radius: 12px !important;
-    border-left: 4px solid #ff4757 !important;
-}
-[data-theme="dark"] .stDataEditor .dataframe {
-    box-shadow: 0 20px 45px rgba(255,107,53,0.4) !important;
-}
-</style>
+<div class="card">
+    <h3>👥 Personnalisation des Noms</h3>
+</div>
 """, unsafe_allow_html=True)
 
-st.subheader("2. Personnalisation des Noms")
 col1, col2 = st.columns(2)
 with col1:
-    source_names = []
-    with st.expander("Noms des Fournisseurs", expanded=False):
+    with st.expander("🏭 Fournisseurs", expanded=True):
+        source_names = []
         for i in range(num_sources):
             source_names.append(st.text_input(f"Fournisseur {i+1}", value=f"Usine {i+1}", key=f"src_{i}"))
+
 with col2:
-    dest_names = []
-    with st.expander("Noms des Clients", expanded=False):
+    with st.expander("👥 Clients", expanded=True):
+        dest_names = []
         for i in range(num_dests):
             dest_names.append(st.text_input(f"Client {i+1}", value=f"Client {i+1}", key=f"dst_{i}"))
 
-st.subheader("3. Saisie des Coûts et Capacités")
-df_structure = pd.DataFrame(0.0, index=source_names, columns=dest_names + ["OFFRE (Capacité)"])
-st.caption(f"Entrez les coûts unitaires ({currency}) et la capacité de chaque fournisseur.")
-input_df = st.data_editor(df_structure, key="input_matrix", use_container_width=True)
+# Section 2: Saisie des données
+st.markdown("""
+<div class="card">
+    <h3>💰 Saisie des Coûts et Capacités</h3>
+    <p>Entrez les coûts unitaires ({}) et la capacité de chaque fournisseur</p>
+</div>
+""".format(currency), unsafe_allow_html=True)
 
-st.caption("Entrez la demande pour chaque client.")
-demand_structure = pd.DataFrame(0.0, index=["DEMANDE"], columns=dest_names)
-demand_df = st.data_editor(demand_structure, key="demand_matrix", use_container_width=True)
+# Créer le dataframe pour les coûts
+costs_data = {}
+for dest in dest_names:
+    costs_data[dest] = [0.0] * num_sources
 
-if st.button("🚀 Lancer l'Optimisation et Visualiser", type="primary", use_container_width=True):
+df_costs = pd.DataFrame(costs_data, index=source_names)
+df_costs["OFFRE (Capacité)"] = [0.0] * num_sources
+
+# Éditeur de données pour les coûts
+edited_costs = st.data_editor(
+    df_costs,
+    use_container_width=True,
+    key="costs_editor",
+    column_config={
+        "OFFRE (Capacité)": st.column_config.NumberColumn(
+            "OFFRE (Capacité)",
+            help="Capacité de production du fournisseur"
+        )
+    }
+)
+
+st.markdown("""
+<div class="card">
+    <h3>📋 Demande des Clients</h3>
+</div>
+""", unsafe_allow_html=True)
+
+# Créer le dataframe pour la demande
+demand_data = {dest: [0.0] for dest in dest_names}
+df_demand = pd.DataFrame(demand_data, index=["DEMANDE"])
+
+# Éditeur de données pour la demande
+edited_demand = st.data_editor(
+    df_demand,
+    use_container_width=True,
+    key="demand_editor"
+)
+
+# Bouton d'optimisation
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    if st.button("🚀 Lancer l'Optimisation", type="primary", use_container_width=True):
+        st.session_state.run_optimization = True
+
+# Section 3: Résultats
+if 'run_optimization' in st.session_state and st.session_state.run_optimization:
     try:
-        costs = input_df.iloc[:, :-1].values
-        supply = input_df.iloc[:, -1].values
-        demand = demand_df.iloc[0, :].values
+        costs = edited_costs.iloc[:, :-1].values.astype(float)
+        supply = edited_costs.iloc[:, -1].values.astype(float)
+        demand = edited_demand.iloc[0, :].values.astype(float)
         
         if np.any(costs < 0) or np.any(supply < 0) or np.any(demand < 0):
-            st.error("Les valeurs doivent être positives.")
+            st.error("❌ Les valeurs doivent être positives.")
         else:
-            allocation, total_cost = vogel_approximation_method(costs, supply, demand)
+            with st.spinner("Calcul en cours..."):
+                allocation, total_cost = vogel_approximation_method(costs, supply, demand)
             
-            # --- Préparation des Labels Finaux (avec Dummy si nécessaire) ---
+            # Préparation des résultats
             final_sources = source_names.copy()
             final_dests = dest_names.copy()
             
@@ -569,30 +567,58 @@ if st.button("🚀 Lancer l'Optimisation et Visualiser", type="primary", use_con
             if allocation.shape[1] > len(dest_names):
                 final_dests.append("Fictif (Demande)")
                 
-            res_df = pd.DataFrame(allocation, index=final_sources[:allocation.shape[0]], columns=final_dests[:allocation.shape[1]])
+            res_df = pd.DataFrame(
+                allocation,
+                index=final_sources[:allocation.shape[0]],
+                columns=final_dests[:allocation.shape[1]]
+            )
             
-            st.divider()
+            st.markdown("---")
             
-            # --- TABS POUR RÉSULTATS & VISUALISATION ---
-            tab1, tab2, tab3 = st.tabs(["📋 Tableau des Résultats", "📊 Visualisation des Flux", "📥 Export Excel"])
+            # Onglets pour les résultats
+            tab1, tab2, tab3 = st.tabs(["📊 Résultats", "📈 Visualisation", "💾 Export"])
             
             with tab1:
-                st.subheader("Plan de Transport Optimal")
-                st.metric(label="Coût Total Minimum", value=f"{total_cost:,.2f} {currency}")
+                st.markdown(f"""
+                <div class="card">
+                    <h3>✅ Plan de Transport Optimal</h3>
+                    <div style="font-size: 1.5rem; color: var(--success); font-weight: bold;">
+                        Coût Total Minimum: {total_cost:,.2f} {currency}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
                 
-                def highlight_cells(val):
-                    return 'background-color: #d4edda; color: black' if val > 0 else ''
-                st.dataframe(res_df.style.applymap(highlight_cells), use_container_width=True)
-                
+                # Afficher le tableau des allocations
+                st.dataframe(
+                    res_df.style.applymap(
+                        lambda x: 'background-color: #d4edda; color: black' if x > 0 else ''
+                    ),
+                    use_container_width=True
+                )
+            
             with tab2:
-                st.subheader("Flux Physiques (Source → Destination)")
-                sankey_fig = plot_sankey(allocation, final_sources[:allocation.shape[0]], final_dests[:allocation.shape[1]])
+                st.markdown("""
+                <div class="card">
+                    <h3>📊 Visualisation des Flux</h3>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Diagramme Sankey
+                sankey_fig = plot_sankey(
+                    allocation,
+                    final_sources[:allocation.shape[0]],
+                    final_dests[:allocation.shape[1]]
+                )
                 st.plotly_chart(sankey_fig, use_container_width=True)
                 
-                st.divider()
-                st.subheader("Détail des Coûts par Fournisseur")
-                # Calcul des coûts par ligne pour graphique
-                # Attention: dimensions de costs vs allocation peuvent différer si dummy
+                # Graphique à barres
+                st.markdown("---")
+                st.markdown("""
+                <div class="card">
+                    <h3>📊 Répartition des Coûts par Fournisseur</h3>
+                </div>
+                """, unsafe_allow_html=True)
+                
                 real_rows = min(costs.shape[0], allocation.shape[0])
                 real_cols = min(costs.shape[1], allocation.shape[1])
                 
@@ -601,79 +627,74 @@ if st.button("🚀 Lancer l'Optimisation et Visualiser", type="primary", use_con
                     row_cost = np.sum(allocation[r, :real_cols] * costs[r, :real_cols])
                     cost_per_source.append(row_cost)
                 
-                # Création Bar Chart
                 bar_fig = px.bar(
-                    x=source_names[:real_rows], 
+                    x=source_names[:real_rows],
                     y=cost_per_source,
                     labels={'x': 'Fournisseur', 'y': f'Coût ({currency})'},
-                    title="Coût total généré par Fournisseur",
+                    title="",
                     color=cost_per_source,
                     color_continuous_scale='Blues'
                 )
-                st.plotly_chart(bar_fig, use_container_width=True)
-
-            with tab3:
-                st.subheader("Télécharger le rapport")
-                excel_data = generate_excel(input_df, demand_df, res_df, total_cost, currency)
-                st.download_button(
-                    label="📄 Télécharger le rapport Excel (.xlsx)",
-                    data=excel_data,
-                    file_name="rapport_vam_transport_visu.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                bar_fig.update_layout(
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)'
                 )
+                st.plotly_chart(bar_fig, use_container_width=True)
             
+            with tab3:
+                st.markdown("""
+                <div class="card">
+                    <h3>💾 Export des Résultats</h3>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                excel_data = generate_excel(edited_costs, edited_demand, res_df, total_cost, currency)
+                
+                st.download_button(
+                    label="📥 Télécharger le Rapport Excel",
+                    data=excel_data,
+                    file_name=f"rapport_vam_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True
+                )
+                
+                st.info("📋 Le rapport contient toutes les données d'entrée, la solution optimale et les résultats détaillés.")
+    
     except Exception as e:
-        st.error(f"Erreur de calcul : {e}")
+        st.error(f"❌ Erreur lors du calcul : {str(e)}")
 
-# --- SECTION AVIS & TELEGRAM ---
-st.divider()
-st.subheader("💬 Votre Avis")
+# --- SECTION FEEDBACK ---
+st.markdown("---")
+st.markdown("""
+<div class="card">
+    <h3>💬 Votre Avis</h3>
+    <p>Partagez vos commentaires pour améliorer l'application</p>
+</div>
+""", unsafe_allow_html=True)
 
 with st.form("feedback_form", clear_on_submit=True):
-    name = st.text_input("👤 Votre Nom (ou entreprise)")
-    msg = st.text_area("✍️ Votre commentaire ou suggestion")
+    name = st.text_input("👤 Votre nom ou entreprise")
+    message = st.text_area("💭 Votre message", height=100)
     
-    # Bouton d'envoi
-    submit_button = st.form_submit_button("🚀 Envoyer l'avis", type="primary", use_container_width=True)
+    submit_col1, submit_col2, submit_col3 = st.columns([1, 2, 1])
+    with submit_col2:
+        submitted = st.form_submit_button("📨 Envoyer", type="primary", use_container_width=True)
+    
+    if submitted and message:
+        try:
+            send_telegram_feedback(name if name else "Anonyme", message)
+            st.success("✅ Merci pour votre feedback !")
+            st.balloons()
+        except:
+            st.warning("⚠️ Impossible d'envoyer le message, mais il a été enregistré localement.")
+    elif submitted:
+        st.warning("⚠️ Veuillez écrire un message avant d'envoyer.")
 
-    if submit_button:
-        if msg:
-            # 1. Animation de chargement pendant l'appel API
-            with st.status("Transmission de votre message ...", expanded=False) as status:
-                success = send_telegram_feedback(name, msg)
-                status.update(label="Message transmis avec succès ! ✅", state="complete")
-            
-            # 2. Petite notification discrète en bas à droite
-            st.toast(f"Merci {name if name else ''} ! Avis reçu.", icon='📩')
-            # Message de succès final
-            st.success("✅ Votre avis a été envoyé et sera consulté par l'équipe.")
-        else:
-            st.warning("⚠️ Le champ commentaire ne peut pas être vide.")
-
-# JavaScript supplémentaire pour mettre à jour le thème dynamiquement
-components.html(f"""
-<script>
-// Mettre à jour l'attribut data-theme sur le body
-document.body.setAttribute('data-theme', '{'dark' if st.session_state.dark_mode else 'light'}');
-
-// Mettre à jour le checkbox
-const switchElement = document.getElementById('theme-switch');
-if (switchElement) {{
-    switchElement.checked = {str(st.session_state.dark_mode).lower()};
-}}
-
-// Ajouter un événement au switch
-document.addEventListener('DOMContentLoaded', function() {{
-    const switchElement = document.getElementById('theme-switch');
-    if (switchElement) {{
-        switchElement.addEventListener('change', function() {{
-            // Envoyer un clic au bouton Streamlit caché
-            const streamlitButton = document.querySelector('[data-testid="baseButton-secondary"]');
-            if (streamlitButton && streamlitButton.textContent.includes('Basculer le thème')) {{
-                streamlitButton.click();
-            }}
-        }});
-    }}
-}});
-</script>
-""", height=0)
+# --- FOOTER ---
+st.markdown("---")
+st.markdown("""
+<div style="text-align: center; color: var(--text-secondary); padding: 2rem 0;">
+    <p>VOGEL SYSTEM Pro © 2024 | Logistics Intelligence Platform</p>
+    <p style="font-size: 0.9rem;">Développé avec ❤️ pour optimiser votre logistique</p>
+</div>
+""", unsafe_allow_html=True)
