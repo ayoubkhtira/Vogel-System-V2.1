@@ -166,17 +166,6 @@ st.markdown("""
     border-radius: var(--radius) !important;
 }
 
-/* Badges */
-.badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
-    color: white;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-}
-
 /* Sidebar */
 .css-1d391kg {
     background: white !important;
@@ -222,36 +211,13 @@ hr {
 </style>
 """, unsafe_allow_html=True)
 
-# --- HEADER MODERNE ---
+# --- HEADER SIMPLIFIÉ ---
 st.markdown("""
 <div class="glass-header">
-    <div style="display: flex; align-items: center; justify-content: space-between;">
-        <div>
-            <h1 style="color: white; margin: 0; font-size: 2.5rem; font-weight: 800;">
-                VOGEL <span style="color: #FBBF24;">PRO</span>
-            </h1>
-            <p style="color: rgba(255, 255, 255, 0.9); margin: 0.5rem 0 0; font-size: 1.1rem;">
-                Advanced Logistics Optimization System
-            </p>
-        </div>
-        <div style="display: flex; gap: 10px;">
-            <span class="badge">AI-POWERED</span>
-            <span class="badge" style="background: linear-gradient(135deg, #10B981, #8B5CF6);">REAL-TIME</span>
-        </div>
-    </div>
-    <div style="margin-top: 1.5rem; display: flex; gap: 1.5rem;">
-        <div style="display: flex; align-items: center; gap: 0.5rem; color: rgba(255, 255, 255, 0.9);">
-            <i class="fas fa-bolt" style="color: #FBBF24;"></i>
-            <span>Fast Optimization</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 0.5rem; color: rgba(255, 255, 255, 0.9);">
-            <i class="fas fa-chart-line" style="color: #06B6D4;"></i>
-            <span>Visual Analytics</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 0.5rem; color: rgba(255, 255, 255, 0.9);">
-            <i class="fas fa-file-export" style="color: #8B5CF6;"></i>
-            <span>Export Reports</span>
-        </div>
+    <div style="text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 2.5rem; font-weight: 800;">
+            VOGEL <span style="color: #FBBF24;">PRO</span>
+        </h1>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -265,9 +231,6 @@ with st.sidebar:
             <i class="fas fa-sliders-h" style="color: white; font-size: 1.5rem;"></i>
         </div>
         <h3 style="color: #1F2937; margin: 0; font-weight: 700;">PARAMETERS</h3>
-        <p style="color: #6B7280; font-size: 0.9rem; margin-top: 0.25rem;">
-            Configure your optimization
-        </p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -460,7 +423,6 @@ st.markdown("""
         </div>
         <div>
             <h3 style="color: #1F2937; margin: 0;">Entity Configuration</h3>
-            <p style="color: #6B7280; margin: 0.25rem 0 0;">Define suppliers and customers</p>
         </div>
     </div>
 </div>
@@ -497,7 +459,6 @@ st.markdown("""
         </div>
         <div>
             <h3 style="color: #1F2937; margin: 0;">Cost & Capacity Matrix</h3>
-            <p style="color: #6B7280; margin: 0.25rem 0 0;">Enter unit costs and capacities</p>
         </div>
     </div>
 </div>
@@ -533,7 +494,6 @@ st.markdown("""
         </div>
         <div>
             <h3 style="color: #1F2937; margin: 0;">Customer Demand</h3>
-            <p style="color: #6B7280; margin: 0.25rem 0 0;">Enter demand for each customer</p>
         </div>
     </div>
 </div>
@@ -592,9 +552,6 @@ if 'run_optimization' in st.session_state and st.session_state.run_optimization:
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                         <div>
                             <h3 style="color: #1F2937; margin: 0;">Optimal Transport Plan</h3>
-                            <p style="color: #6B7280; margin: 0.25rem 0 0;">
-                                Vogel's Approximation Method Solution
-                            </p>
                         </div>
                         <div style="text-align: right;">
                             <div style="font-size: 2rem; font-weight: 800; color: #10B981;">
@@ -669,9 +626,6 @@ if 'run_optimization' in st.session_state and st.session_state.run_optimization:
                         </div>
                         <div>
                             <h3 style="color: #1F2937; margin: 0;">Export Results</h3>
-                            <p style="color: #6B7280; margin: 0.25rem 0 0;">
-                                Download comprehensive report
-                            </p>
                         </div>
                     </div>
                 </div>
@@ -688,8 +642,6 @@ if 'run_optimization' in st.session_state and st.session_state.run_optimization:
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         use_container_width=True
                     )
-                
-                st.info("💡 The report includes input data, customer demand, optimal solution, and total cost calculation.")
     
     except Exception as e:
         st.error(f"❌ Calculation error: {str(e)}")
@@ -704,22 +656,14 @@ st.markdown("""
             <i class="fas fa-comment-dots" style="color: white; font-size: 1.25rem;"></i>
         </div>
         <div>
-            <h3 style="color: #1F2937; margin: 0;">Feedback & Suggestions</h3>
-            <p style="color: #6B7280; margin: 0.25rem 0 0;">
-                Help us improve the platform
-            </p>
+            <h3 style="color: #1F2937; margin: 0;">Feedback</h3>
         </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 with st.form("feedback_form", clear_on_submit=True):
-    col1, col2 = st.columns(2)
-    with col1:
-        name = st.text_input("Your Name", placeholder="Enter your name")
-    with col2:
-        email = st.text_input("Email (Optional)", placeholder="email@example.com")
-    
+    name = st.text_input("Your Name", placeholder="Enter your name")
     message = st.text_area("Your Message", placeholder="Share your thoughts...", height=100)
     
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -730,7 +674,6 @@ with st.form("feedback_form", clear_on_submit=True):
         try:
             send_telegram_feedback(name if name else "Anonymous", message)
             st.success("✅ Thank you for your feedback!")
-            st.balloons()
         except:
             st.success("✅ Feedback recorded. Thank you!")
     elif submitted:
@@ -740,10 +683,7 @@ with st.form("feedback_form", clear_on_submit=True):
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #6B7280; padding: 2rem 0;">
-    <p style="font-size: 0.9rem;">VOGEL PRO SYSTEM © 2024 | Advanced Logistics Optimization Platform</p>
-    <p style="font-size: 0.8rem; opacity: 0.7;">
-        Powered by Vogel's Approximation Method • AI-Enhanced Analytics • Real-time Optimization
-    </p>
+    <p style="font-size: 0.9rem;">VOGEL PRO SYSTEM © 2024</p>
 </div>
 """, unsafe_allow_html=True)
 
