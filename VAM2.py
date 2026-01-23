@@ -19,61 +19,65 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Initialiser l'état du thème dans la session
+if 'dark_mode' not in st.session_state:
+    st.session_state.dark_mode = False
+
 # --- CSS pour le dark/light mode et le switch ---
-st.markdown("""
+st.markdown(f"""
 <style>
-:root {
+:root {{
     --primary-color: #667eea;
     --secondary-color: #764ba2;
     --text-color: #333;
     --bg-color: #f8f9fa;
     --card-bg: #ffffff;
     --border-color: #e0e0e0;
-}
+}}
 
-[data-theme="dark"] {
+[data-theme="dark"] {{
     --primary-color: #764ba2;
     --secondary-color: #667eea;
     --text-color: #f0f0f0;
     --bg-color: #1a1a1a;
     --card-bg: #2d2d2d;
     --border-color: #444;
-}
+}}
 
-body {
+body {{
     background-color: var(--bg-color) !important;
     color: var(--text-color) !important;
     transition: background-color 0.3s, color 0.3s;
-}
+}}
 
-.stApp {
+.stApp {{
     background-color: var(--bg-color) !important;
-}
+}}
 
 /* Style du switch */
-.switch-container {
+.switch-container {{
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 1rem 0;
     margin-top: 1rem;
     border-top: 1px solid var(--border-color);
-}
+}}
 
-.switch {
+.switch {{
     position: relative;
     display: inline-block;
     width: 60px;
     height: 34px;
-}
+}}
 
-.switch input {
+.switch input {{
     opacity: 0;
     width: 0;
     height: 0;
-}
+}}
 
-.slider {
+.slider {{
     position: absolute;
     cursor: pointer;
     top: 0;
@@ -87,9 +91,9 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0 6px;
-}
+}}
 
-.slider:before {
+.slider:before {{
     position: absolute;
     content: "";
     height: 26px;
@@ -100,79 +104,111 @@ body {
     transition: .4s;
     border-radius: 50%;
     z-index: 2;
-}
+}}
 
-input:checked + .slider {
+input:checked + .slider {{
     background-color: #764ba2;
-}
+}}
 
-input:checked + .slider:before {
+input:checked + .slider:before {{
     transform: translateX(26px);
-}
+}}
 
-.slider i {
+.slider i {{
     font-size: 14px;
     z-index: 1;
-}
+}}
 
-.slider .fa-sun {
+.slider .fa-sun {{
     color: #ffd700 !important;
-}
+}}
 
-.slider .fa-moon {
+.slider .fa-moon {{
     color: #fff !important;
-}
+}}
 
-/* Ajustements pour le dark mode */
-[data-theme="dark"] .stDataEditor .dataframe {
-    box-shadow: 0 20px 45px rgba(255, 107, 53, 0.4) !important;
-    background-color: var(--card-bg) !important;
-}
+/* Appliquer le thème au body */
+body[data-theme="dark"] {{
+    background-color: #1a1a1a !important;
+    color: #f0f0f0 !important;
+}}
 
-[data-theme="dark"] .stButton button {
-    background-color: var(--primary-color) !important;
-    color: white !important;
-}
-
-[data-theme="dark"] .stButton button:hover {
-    background-color: var(--secondary-color) !important;
-}
+/* Ajustements pour Streamlit components en dark mode */
+[data-theme="dark"] .stDataFrame, 
+[data-theme="dark"] .dataframe, 
+[data-theme="dark"] .stDataEditor,
+[data-theme="dark"] .stTable {{
+    background-color: #2d2d2d !important;
+    color: #f0f0f0 !important;
+}}
 
 [data-theme="dark"] .stTextInput input,
 [data-theme="dark"] .stTextArea textarea,
-[data-theme="dark"] .stNumberInput input {
-    background-color: var(--card-bg) !important;
-    color: var(--text-color) !important;
-    border-color: var(--border-color) !important;
-}
+[data-theme="dark"] .stNumberInput input {{
+    background-color: #2d2d2d !important;
+    color: #f0f0f0 !important;
+    border-color: #444 !important;
+}}
+
+[data-theme="dark"] .stButton button {{
+    background-color: #764ba2 !important;
+    color: white !important;
+}}
+
+[data-theme="dark"] .stButton button:hover {{
+    background-color: #667eea !important;
+}}
+
+[data-theme="dark"] .stMetric {{
+    color: #f0f0f0 !important;
+}}
+
+[data-theme="dark"] .stExpander {{
+    background-color: #2d2d2d !important;
+    border-color: #444 !important;
+}}
+
+[data-theme="dark"] .stTabs [data-baseweb="tab-list"] {{
+    background-color: #2d2d2d !important;
+}}
+
+[data-theme="dark"] .stTabs [data-baseweb="tab"] {{
+    color: #f0f0f0 !important;
+}}
+
+[data-theme="dark"] .stSubheader, 
+[data-theme="dark"] .stMarkdown h1,
+[data-theme="dark"] .stMarkdown h2,
+[data-theme="dark"] .stMarkdown h3 {{
+    color: #f0f0f0 !important;
+}}
+
+[data-theme="dark"] .stDataEditor .dataframe {{
+    box-shadow: 0 20px 45px rgba(255, 107, 53, 0.4) !important;
+    background-color: #2d2d2d !important;
+    color: #f0f0f0 !important;
+}}
 </style>
 
 <script>
-// Charger le thème depuis localStorage
-function loadTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    document.getElementById('switch').checked = (savedTheme === 'dark');
-}
-
-// Basculer le thème
-function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-}
-
-// Attacher l'événement au switch
-document.addEventListener('DOMContentLoaded', function() {
-    loadTheme();
-    const themeSwitch = document.getElementById('switch');
-    if (themeSwitch) {
-        themeSwitch.addEventListener('change', toggleTheme);
-    }
-});
+// Définir le thème initial basé sur l'état de session
+document.addEventListener('DOMContentLoaded', function() {{
+    const isDarkMode = {str(st.session_state.dark_mode).lower()};
+    document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+    
+    // Mettre à jour le checkbox
+    const switchElement = document.getElementById('theme-switch');
+    if (switchElement) {{
+        switchElement.checked = isDarkMode;
+    }}
+}});
 </script>
 """, unsafe_allow_html=True)
+
+# Fonction pour basculer le thème
+def toggle_theme():
+    st.session_state.dark_mode = not st.session_state.dark_mode
+    st.rerun()
 
 # --- 5. AFFICHAGE DU HEADER (Composant Isolé) ---
 header_code = """
@@ -447,19 +483,36 @@ with st.sidebar:
     
     # --- SWITCH DARK/LIGHT MODE ---
     st.markdown('<div class="switch-container">', unsafe_allow_html=True)
-    st.markdown("""
-    <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-        <label class="switch">
-            <input type="checkbox" id="switch">
-            <span class="slider round">
-                <i class="fas fa-sun"></i>
-                <i class="fas fa-moon"></i>
+    
+    # Créer une colonne pour centrer le switch
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        # Utiliser un bouton avec HTML pour le switch
+        switch_html = f"""
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <label class="switch">
+                <input type="checkbox" id="theme-switch" {'checked' if st.session_state.dark_mode else ''}>
+                <span class="slider round">
+                    <i class="fas fa-sun"></i>
+                    <i class="fas fa-moon"></i>
+                </span>
+            </label>
+            <span style="color: {'#f0f0f0' if st.session_state.dark_mode else '#333'}; font-weight: 500;">
+                {('Mode Sombre' if st.session_state.dark_mode else 'Mode Clair')}
             </span>
-        </label>
-        <span style="color: var(--text-color); font-weight: 500;">Mode Sombre</span>
-    </div>
-    """, unsafe_allow_html=True)
+        </div>
+        """
+        st.markdown(switch_html, unsafe_allow_html=True)
+        
+        # Ajouter un bouton invisible pour déclencher le changement
+        if st.button("🔁 Basculer le thème", key="theme_toggle", use_container_width=True):
+            toggle_theme()
+    
     st.markdown('</div>', unsafe_allow_html=True)
+
+# Afficher l'indicateur de thème actuel
+theme_indicator = "🌙 Mode Sombre" if st.session_state.dark_mode else "☀️ Mode Clair"
+st.sidebar.caption(f"Thème actuel: {theme_indicator}")
 
 st.markdown("""
 <style>
@@ -468,7 +521,7 @@ st.markdown("""
     border-radius: 12px !important;
     border-left: 4px solid #ff4757 !important;
 }
-.dark .stDataEditor .dataframe {
+[data-theme="dark"] .stDataEditor .dataframe {
     box-shadow: 0 20px 45px rgba(255,107,53,0.4) !important;
 }
 </style>
@@ -597,42 +650,30 @@ with st.form("feedback_form", clear_on_submit=True):
         else:
             st.warning("⚠️ Le champ commentaire ne peut pas être vide.")
 
-# --- JavaScript pour charger le thème initial ---
-components.html("""
+# JavaScript supplémentaire pour mettre à jour le thème dynamiquement
+components.html(f"""
 <script>
-// Fonction pour initialiser le thème
-function initTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    const switchElement = document.getElementById('switch');
-    if (switchElement) {
-        switchElement.checked = (savedTheme === 'dark');
-    }
-}
+// Mettre à jour l'attribut data-theme sur le body
+document.body.setAttribute('data-theme', '{'dark' if st.session_state.dark_mode else 'light'}');
 
-// Attacher l'événement au switch
-function attachSwitchListener() {
-    const themeSwitch = document.getElementById('switch');
-    if (themeSwitch) {
-        themeSwitch.addEventListener('change', function() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-        });
-    }
-}
+// Mettre à jour le checkbox
+const switchElement = document.getElementById('theme-switch');
+if (switchElement) {{
+    switchElement.checked = {str(st.session_state.dark_mode).lower()};
+}}
 
-// Initialiser quand la page est chargée
-document.addEventListener('DOMContentLoaded', function() {
-    initTheme();
-    attachSwitchListener();
-});
-
-// Réessayer après un court délai au cas où les éléments ne seraient pas encore chargés
-setTimeout(() => {
-    initTheme();
-    attachSwitchListener();
-}, 100);
+// Ajouter un événement au switch
+document.addEventListener('DOMContentLoaded', function() {{
+    const switchElement = document.getElementById('theme-switch');
+    if (switchElement) {{
+        switchElement.addEventListener('change', function() {{
+            // Envoyer un clic au bouton Streamlit caché
+            const streamlitButton = document.querySelector('[data-testid="baseButton-secondary"]');
+            if (streamlitButton && streamlitButton.textContent.includes('Basculer le thème')) {{
+                streamlitButton.click();
+            }}
+        }});
+    }}
+}});
 </script>
 """, height=0)
